@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kronos — Calendar Scheduler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <span class="brand-icon">◈</span>
+        <span class="brand-name">Kronos</span>
+      </div>
+      <div class="nav-controls">
+        <button class="btn-nav" id="btn-prev" aria-label="Previous">&#8592;</button>
+        <button class="btn-today" id="btn-today">Today</button>
+        <button class="btn-nav" id="btn-next" aria-label="Next">&#8594;</button>
+      </div>
+      <h1 class="view-title" id="view-title">April 2026</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Search events…" aria-label="Search events" />
+      </div>
+      <div class="view-toggle">
+        <button class="btn-view active" data-view="month">Month</button>
+        <button class="btn-view" data-view="week">Week</button>
+        <button class="btn-view" data-view="day">Day</button>
+      </div>
+      <button class="btn-theme" id="btn-theme" aria-label="Toggle theme">☀</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">‹</button>
+
+      <section class="sidebar-section">
+        <h3 class="sidebar-heading">Filters</h3>
+        <div class="filter-chips" id="filter-chips">
+          <button class="chip active" data-cat="all">All</button>
+          <button class="chip" data-cat="work">Work</button>
+          <button class="chip" data-cat="personal">Personal</button>
+          <button class="chip" data-cat="study">Study</button>
+          <button class="chip" data-cat="other">Other</button>
+        </div>
+      </section>
+
+      <section class="sidebar-section">
+        <h3 class="sidebar-heading">Upcoming <span class="dim">— 7 days</span></h3>
+        <ul class="upcoming-list" id="upcoming-list">
+          <li class="upcoming-empty">No upcoming events</li>
+        </ul>
+      </section>
+
+      <section class="sidebar-section" id="insights-section">
+        <h3 class="sidebar-heading">Insights</h3>
+        <div class="insights-panel" id="insights-panel">
+          <div class="insight-item">
+            <span class="insight-label">Busiest day</span>
+            <span class="insight-value" id="insight-busy">—</span>
+          </div>
+          <div class="insight-item">
+            <span class="insight-label">Free today</span>
+            <span class="insight-value" id="insight-free">—</span>
+          </div>
+          <div class="insight-item">
+            <span class="insight-label">Events this week</span>
+            <span class="insight-value" id="insight-week">0</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- CALENDAR MAIN -->
+    <main class="calendar-main" id="calendar-main">
+
+      <!-- MONTH VIEW -->
+      <div class="view-container" id="view-month">
+        <div class="month-header-row">
+          <span>Sun</span><span>Mon</span><span>Tue</span>
+          <span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="month-grid" id="month-grid"></div>
+      </div>
+
+      <!-- WEEK VIEW -->
+      <div class="view-container hidden" id="view-week">
+        <div class="week-header" id="week-header"></div>
+        <div class="week-body" id="week-body">
+          <div class="time-gutter" id="week-gutter"></div>
+          <div class="week-columns" id="week-columns"></div>
+        </div>
+      </div>
+
+      <!-- DAY VIEW -->
+      <div class="view-container hidden" id="view-day">
+        <div class="day-header" id="day-header"></div>
+        <div class="day-body">
+          <div class="time-gutter" id="day-gutter"></div>
+          <div class="day-column" id="day-column"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD EVENT FAB -->
+  <button class="fab" id="fab" aria-label="Add event" title="Add event">+</button>
+
+  <!-- EVENT MODAL -->
+  <div class="modal-overlay hidden" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">New Event</h2>
+        <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <form class="modal-form" id="event-form" novalidate>
+        <input type="hidden" id="event-id" />
+
+        <div class="form-group">
+          <label for="event-title">Title <span class="required">*</span></label>
+          <input type="text" id="event-title" placeholder="Event title" required autocomplete="off" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-date">Date <span class="required">*</span></label>
+            <input type="date" id="event-date" required />
+          </div>
+          <div class="form-group">
+            <label for="event-time">Time</label>
+            <input type="time" id="event-time" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-category">Category</label>
+          <select id="event-category">
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+            <option value="study">Study</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="event-recurrence">Recurrence</label>
+          <select id="event-recurrence">
+            <option value="none">None</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="event-reminder">Reminder</label>
+          <select id="event-reminder">
+            <option value="none">None</option>
+            <option value="5">5 minutes before</option>
+            <option value="10">10 minutes before</option>
+            <option value="30">30 minutes before</option>
+            <option value="60">1 hour before</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="event-description">Description</label>
+          <textarea id="event-description" rows="3" placeholder="Optional notes…"></textarea>
+        </div>
+
+        <div class="suggestion-box hidden" id="suggestion-box">
+          <span class="suggestion-icon">💡</span>
+          <span id="suggestion-text"></span>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-delete hidden" id="btn-delete">Delete</button>
+          <div class="modal-actions-right">
+            <button type="button" class="btn-cancel" id="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-save" id="btn-save">Save Event</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFLICT MODAL -->
+  <div class="modal-overlay hidden" id="conflict-overlay">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">⚠ Conflict Detected</h2>
+      </div>
+      <p class="conflict-msg" id="conflict-msg"></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="conflict-cancel">Go Back</button>
+        <div class="modal-actions-right">
+          <button class="btn-save" id="conflict-confirm">Save Anyway</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION TOAST -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-icon">🔔</span>
+    <span class="toast-msg" id="toast-msg"></span>
+    <button class="toast-close" id="toast-close">&times;</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
